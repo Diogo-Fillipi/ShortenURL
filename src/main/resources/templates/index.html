@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>URL Shortener</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a; /* dark blue */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #1e293b; /* dark gray-blue */
+            padding: 40px;
+            border-radius: 10px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+        }
+
+        h1 {
+            color: #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            margin-bottom: 15px;
+            background-color: #334155;
+            color: #e5e7eb;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb; /* blue */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        #deleteBtn {
+            margin-top: 10px;
+            background-color: #dc2626; /* red */
+        }
+
+        #deleteBtn:hover {
+            background-color: #b91c1c;
+        }
+
+        #result {
+            margin-top: 20px;
+            word-break: break-all;
+        }
+
+        .error {
+            color: #f87171;
+        }
+
+        .success {
+            color: #4ade80;
+        }
+
+        .info {
+            color: #facc15;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>URL Shortener</h1>
+
+    <form id="shorten-form">
+        <input
+                type="text"
+                id="originalUrl"
+                placeholder="Paste your original URL here..."
+                required
+        />
+        <button type="submit">Shorten</button>
+    </form>
+
+    <button type="button" id="deleteBtn">Delete URL</button>
+
+    <p id="result"></p>
+</div>
+
+<script>
+    const form = document.getElementById("shorten-form");
+    const result = document.getElementById("result");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const originalUrl = document.getElementById("originalUrl").value;
+
+        result.textContent = "Sending URL...";
+        result.className = "info";
+
+        try {
+            const response = await fetch("/shorten", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({originalURL: originalUrl })
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const shortUrl = await response.text();
+
+            result.textContent = "Short URL created: " + shortUrl;
+            result.className = "success";
+
+        } catch (err) {
+            result.textContent = "Failed to shorten URL.";
+            result.className = "error";
+        }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+        const code = document.getElementById("originalUrl").value;
+
+        if (!originalUrl) {
+            result.textContent = "Enter a URL to delete.";
+            result.className = "error";
+            return;
+        }
+
+        result.textContent = "Deleting URL...";
+        result.className = "info";
+
+        try {
+            console.log(JSON.stringify({ code: originalUrl }));
+            const response = await fetch("/delete", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: code })
+            });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            result.textContent = "URL deleted successfully.";
+            result.className = "success";
+
+        } catch (err) {
+            result.textContent = "Failed to delete URL.";
+            result.className = "error";
+        }
+    });
+</script>
+
+</body>
+</html>
