@@ -2,6 +2,10 @@ package roadmapsh.project.shortenurl.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -20,6 +24,13 @@ public class URLModel{
 
     @Column
     Integer timesAccessed;
+
+    @CreationTimestamp
+    @Column (updatable = false)
+    LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    LocalDateTime updatedAt;
 
 
     public Long getUrlId() {
@@ -52,5 +63,21 @@ public class URLModel{
 
     public void setTimesAccessed(Integer timesAccessed) {
         this.timesAccessed = timesAccessed;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime localDateTime) {
+        this.createdAt = localDateTime;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime localDateTime) {
+        this.updatedAt = localDateTime;
     }
 }
