@@ -55,5 +55,9 @@ public class ShortenURLController {
         return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(shortenURLService.updateShortenURL(urldto.oldURLHashCode(), urldto.newURL()));
     }
 
+    @GetMapping("/stats/{hashCode}")
+    public ResponseEntity<URLResponseDTO> shortenURLStats(@PathVariable String hashCode) {
+        return ResponseEntity.ok(shortenURLService.getStats(hashCode));
+    }
 
 }

@@ -23,7 +23,7 @@
             background-color: #1e293b;
             padding: 40px;
             border-radius: 10px;
-            width: 400px;
+            width: 420px;
             text-align: center;
             box-shadow: 0 0 15px rgba(0,0,0,0.4);
         }
@@ -79,27 +79,29 @@
             background-color: #d97706;
         }
 
-        #updateForm {
+        #statsBtn {
+            background-color: #10b981;
+        }
+
+        #statsBtn:hover {
+            background-color: #059669;
+        }
+
+        #updateForm,
+        #statsForm {
             display: none;
             margin-top: 15px;
         }
 
         #result {
             margin-top: 20px;
-            word-break: break-all;
+            word-break: break-word;
+            line-height: 1.5;
         }
 
-        .success {
-            color: #4ade80;
-        }
-
-        .error {
-            color: #f87171;
-        }
-
-        .info {
-            color: #facc15;
-        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #facc15; }
     </style>
 </head>
 <body>
@@ -114,11 +116,17 @@
 
     <button id="updateBtn" type="button">Update URL</button>
     <button id="deleteBtn" type="button">Delete URL</button>
+    <button id="statsBtn" type="button">Stats</button>
 
     <div id="updateForm">
-        <input type="text" id="oldUrl" placeholder="Current original URL">
+        <input type="text" id="oldUrl" placeholder="Short code">
         <input type="text" id="newUrl" placeholder="New URL">
         <button type="button" id="confirmUpdate">Confirm Update</button>
+    </div>
+
+    <div id="statsForm">
+        <input type="text" id="statsHash" placeholder="Short code">
+        <button type="button" id="confirmStats">Get Stats</button>
     </div>
 
     <p id="result"></p>
@@ -127,17 +135,23 @@
 <script>
     const form = document.getElementById("shorten-form");
     const result = document.getElementById("result");
-    const deleteBtn = document.getElementById("deleteBtn");
+
     const updateBtn = document.getElementById("updateBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const statsBtn = document.getElementById("statsBtn");
+
     const updateForm = document.getElementById("updateForm");
+    const statsForm = document.getElementById("statsForm");
+
     const confirmUpdate = document.getElementById("confirmUpdate");
+    const confirmStats = document.getElementById("confirmStats");
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const originalUrl = document.getElementById("originalUrl").value.trim();
 
-        result.textContent = "Sending URL...";
+        result.textContent = "Creating short URL...";
         result.className = "info";
 
         try {
@@ -149,8 +163,13 @@
 
             if (!response.ok) throw new Error();
 
-            const shortUrl = await response.text();
-            result.textContent = "Short URL created: " + shortUrl;
+            const data = await response.json();
+
+            result.innerHTML = `
+                <strong>Short URL created!</strong><br><br>
+                <strong>URL:</strong> ${data.url}<br>
+                <strong>Short Code:</strong> ${data.shortCode}
+            `;
             result.className = "success";
         } catch {
             result.textContent = "Failed to shorten URL.";
@@ -159,10 +178,10 @@
     });
 
     deleteBtn.addEventListener("click", async () => {
-        const originalUrl = document.getElementById("originalUrl").value.trim();
+        const shortCode = document.getElementById("originalUrl").value.trim();
 
-        if (!originalUrl) {
-            result.textContent = "Enter a URL to delete.";
+        if (!shortCode) {
+            result.textContent = "Enter a short code to delete.";
             result.className = "error";
             return;
         }
@@ -174,7 +193,7 @@
             const response = await fetch("/delete", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: originalUrl })
+                body: JSON.stringify({ code: shortCode })
             });
 
             if (!response.ok) throw new Error();
@@ -190,16 +209,15 @@
     updateBtn.addEventListener("click", () => {
         updateForm.style.display =
             updateForm.style.display === "none" ? "block" : "none";
+        statsForm.style.display = "none";
     });
 
-    confirmUpdate.addEventListener("click", async (e) => {
-        e.preventDefault();
-
-        const oldUrl = document.getElementById("oldUrl").value.trim();
+    confirmUpdate.addEventListener("click", async () => {
+        const shortCode = document.getElementById("oldUrl").value.trim();
         const newUrl = document.getElementById("newUrl").value.trim();
 
-        if (!oldUrl || !newUrl) {
-            result.textContent = "Fill in both URLs.";
+        if (!shortCode || !newUrl) {
+            result.textContent = "Fill in all fields.";
             result.className = "error";
             return;
         }
@@ -212,18 +230,65 @@
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    oldURLHashCode: oldUrl,
+                    oldURLHashCode: shortCode,
                     newURL: newUrl
                 })
             });
 
             if (!response.ok) throw new Error();
 
-            result.textContent = "URL updated successfully.";
+            const data = await response.json();
+
+            result.innerHTML = `
+                <strong>URL updated!</strong><br><br>
+                <strong>URL:</strong> ${data.url}<br>
+                <strong>Short Code:</strong> ${data.shortCode}
+            `;
             result.className = "success";
             updateForm.style.display = "none";
         } catch {
             result.textContent = "Failed to update URL.";
+            result.className = "error";
+        }
+    });
+
+    statsBtn.addEventListener("click", () => {
+        statsForm.style.display =
+            statsForm.style.display === "none" ? "block" : "none";
+        updateForm.style.display = "none";
+    });
+
+    confirmStats.addEventListener("click", async () => {
+        const hashCode = document.getElementById("statsHash").value.trim();
+
+        if (!hashCode) {
+            result.textContent = "Enter a hash code.";
+            result.className = "error";
+            return;
+        }
+
+        result.textContent = "Fetching stats...";
+        result.className = "info";
+
+        try {
+            const response = await fetch(`/stats/${hashCode}`);
+
+            if (!response.ok) throw new Error();
+
+            const data = await response.json();
+
+            result.innerHTML = `
+                <strong>URL Stats</strong><br><br>
+                <strong>ID:</strong> ${data.id}<br>
+                <strong>URL:</strong> ${data.url}<br>
+                <strong>Short Code:</strong> ${data.shortCode}<br>
+                <strong>Times Accessed:</strong> ${data.timesAccessed}<br>
+                <strong>Created At:</strong> ${data.createdAt}<br>
+                <strong>Updated At:</strong> ${data.updatedAt ?? "—"}
+            `;
+            result.className = "success";
+        } catch {
+            result.textContent = "Failed to fetch stats.";
             result.className = "error";
         }
     });

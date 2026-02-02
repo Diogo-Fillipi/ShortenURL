@@ -2,12 +2,14 @@ package roadmapsh.project.shortenurl.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.mapper.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roadmapsh.project.shortenurl.DTO.URLResponseDTO;
 import roadmapsh.project.shortenurl.model.URLModel;
 import roadmapsh.project.shortenurl.repository.URLRepository;
+import roadmapsh.project.shortenurl.utils.Mappers;
 
 import java.util.Optional;
 
@@ -40,15 +42,11 @@ public class ShortenURLService {
                 urlModel.setUrlHashCode(hashCode);
                 try {
                     this.urlRepository.save(urlModel);
-                    URLResponseDTO urlResponseDTO = new URLResponseDTO
-                            (urlModel.getUrlId(),
-                                    urlModel.getOriginalURL(),
-                                    urlModel.getUrlHashCode(),
-                                    urlModel.getTimesAccessed(),
-                                    urlModel.getCreatedAt(),
-                                    urlModel.getUpdatedAt());
-                    System.out.println(originalURL);
-                    return urlResponseDTO;
+                    Optional<URLModel> completeUrlModelResponse = this.urlRepository.findByUrlHashCode(hashCode);
+                    if (completeUrlModelResponse.isPresent()) {
+                        return Mappers.urlModelToUrlResponseDTO(completeUrlModelResponse.get());
+                    }
+                    return null;
                 } catch (DataIntegrityViolationException e) {
                     //log.debug("Duplicated code: {}", hashCode);
                 }
@@ -85,18 +83,22 @@ public class ShortenURLService {
         if (shortenURLModel.isPresent()) {
             URLModel previousURLModel = shortenURLModel.get();
             previousURLModel.setOriginalURL(newURL);
-            URLResponseDTO urlResponseDTO = new URLResponseDTO
-                    (previousURLModel.getUrlId(),
-                            previousURLModel.getOriginalURL(),
-                            previousURLModel.getUrlHashCode(),
-                            previousURLModel.getTimesAccessed(),
-                            previousURLModel.getCreatedAt(),
-                            previousURLModel.getUpdatedAt());
             urlRepository.save(previousURLModel);
-            return urlResponseDTO;
+            Optional<URLModel> updatedURLModel = urlRepository.findByUrlHashCode(originalURLHashCode);
+            if (updatedURLModel.isPresent()) {
+                return Mappers.urlModelToUrlResponseDTO(updatedURLModel.get());
+            }
+            return null;
         }
         return null;
     }
 
+    public URLResponseDTO getStats(String originalURLHashCode) {
+        Optional<URLModel> shortenURLModel = urlRepository.findByUrlHashCode(originalURLHashCode);
+        if (shortenURLModel.isPresent()) {
+            return Mappers.urlModelToUrlResponseDTO(shortenURLModel.get());
+        }
+        return null;
+    }
 
 }
