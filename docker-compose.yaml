@@ -1,0 +1,49 @@
+services:
+
+  backend:
+
+    image: nowphy/shortenurl:1.0.0
+
+    ports:
+      - "3000:8080"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/shortenDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: shortenuser
+      SPRING_DATASOURCE_PASSWORD: shortenpass
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    networks:
+      - app-network
+
+  database:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: shortenDB
+      MYSQL_USER: shortenuser
+      MYSQL_PASSWORD: shortenpass
+      MYSQL_ROOT_PASSWORD: rootpass
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    networks:
+      - app-network
+
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+
+networks:
+  app-network:
+
+volumes:
+  mysql_data:
