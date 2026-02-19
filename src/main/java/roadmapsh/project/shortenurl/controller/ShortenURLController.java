@@ -15,6 +15,7 @@ import roadmapsh.project.shortenurl.service.ShortenURLService;
 import java.net.URI;
 
 @RestController
+@RequestMapping("/api")
 public class ShortenURLController {
 
     @Autowired

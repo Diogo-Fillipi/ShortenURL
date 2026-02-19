@@ -59,9 +59,6 @@ public class ShortenURLService {
     public String retrieveOriginalURL(String hashCode) {
         Optional<URLModel> shortenURL = urlRepository.findByUrlHashCode(hashCode);
         if (shortenURL.isPresent()) {
-            URLModel shortenURLModel = shortenURL.get();
-            shortenURLModel.setTimesAccessed(shortenURLModel.getTimesAccessed() + 1);
-            urlRepository.save(shortenURLModel);
             return shortenURL.get().getOriginalURL();
         }
         return null;

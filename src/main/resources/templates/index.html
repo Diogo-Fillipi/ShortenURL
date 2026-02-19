@@ -155,7 +155,7 @@
         result.className = "info";
 
         try {
-            const response = await fetch("/shorten", {
+            const response = await fetch("/api/shorten", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ originalURL: originalUrl })
@@ -190,7 +190,7 @@
         result.className = "info";
 
         try {
-            const response = await fetch("/delete", {
+            const response = await fetch("/api/delete", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ code: shortCode })
@@ -226,7 +226,7 @@
         result.className = "info";
 
         try {
-            const response = await fetch("/update", {
+            const response = await fetch("/api/update", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -271,7 +271,7 @@
         result.className = "info";
 
         try {
-            const response = await fetch(`/stats/${hashCode}`);
+            const response = await fetch(`/api/stats/${hashCode}`);
 
             if (!response.ok) throw new Error();
 
