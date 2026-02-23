@@ -2,9 +2,9 @@ package roadmapsh.project.shortenurl.security;
 
 public enum UserRoles {
 
-    ADMIN("admin"),
+    ADMIN("ADMIN"),
 
-    USER("user");
+    USER("USER");
 
     private String role;
 

@@ -2,10 +2,13 @@ package roadmapsh.project.shortenurl.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;
-import roadmapsh.project.shortenurl.security.User;
+import roadmapsh.project.shortenurl.model.UserModel;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+import java.util.Optional;
 
-    UserDetails findByLogin(String login);
+
+public interface UserRepository extends JpaRepository<UserModel, Long> {
+
+    Optional<UserModel> findByLogin(String login);
 
 }

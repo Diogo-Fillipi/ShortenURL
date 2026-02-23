@@ -2,11 +2,10 @@ package roadmapsh.project.shortenurl.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.mapper.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roadmapsh.project.shortenurl.DTO.URLResponseDTO;
+import roadmapsh.project.shortenurl.DTO.url.URLResponseDTO;
 import roadmapsh.project.shortenurl.model.URLModel;
 import roadmapsh.project.shortenurl.repository.URLRepository;
 import roadmapsh.project.shortenurl.utils.Mappers;
@@ -30,7 +29,7 @@ public class ShortenURLService {
 
     @Transactional
     public URLResponseDTO createShortenURL(String originalURL) {
-
+        if(originalURL == null) return null;
         final int MAX_RETRIES = 5;
         for (int i = 0; i < MAX_RETRIES; i++) {
             String hashCode = base62EncoderService.encode();

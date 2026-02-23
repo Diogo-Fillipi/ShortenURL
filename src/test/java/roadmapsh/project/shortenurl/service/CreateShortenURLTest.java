@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import roadmapsh.project.shortenurl.DTO.URLResponseDTO;
+import roadmapsh.project.shortenurl.DTO.url.URLResponseDTO;
 import roadmapsh.project.shortenurl.model.URLModel;
 import roadmapsh.project.shortenurl.repository.URLRepository;
 

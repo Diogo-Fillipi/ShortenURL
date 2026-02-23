@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roadmapsh.project.shortenurl.DTO.HashCodeDTO;
-import roadmapsh.project.shortenurl.DTO.NewURLDTO;
-import roadmapsh.project.shortenurl.DTO.URLDTO;
-import roadmapsh.project.shortenurl.DTO.URLResponseDTO;
+import roadmapsh.project.shortenurl.DTO.url.HashCodeDTO;
+import roadmapsh.project.shortenurl.DTO.url.NewURLDTO;
+import roadmapsh.project.shortenurl.DTO.url.URLDTO;
+import roadmapsh.project.shortenurl.DTO.url.URLResponseDTO;
 import roadmapsh.project.shortenurl.service.ShortenURLService;
 
 import java.net.URI;
@@ -26,7 +26,8 @@ public class ShortenURLController {
     }
 
     @GetMapping("/{hashCode}")
-    public ResponseEntity<Void> redirectToShortenURL(@PathVariable @Validated String hashCode) {
+    public ResponseEntity<Void> redirectToShortenURL(@PathVariable String hashCode) {
+        if(hashCode == null) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         String originalURL = shortenURLService.retrieveOriginalURL(hashCode);
 
@@ -38,7 +39,10 @@ public class ShortenURLController {
     }
 
     @PostMapping("/shorten")
-    public ResponseEntity<URLResponseDTO> originalURL(@RequestBody @Validated URLDTO urldto) {
+    public ResponseEntity<URLResponseDTO> toShortURL(@RequestBody @Validated URLDTO urldto) {
+        if(shortenURLService.createShortenURL(urldto.originalURL()) == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(shortenURLService.createShortenURL(urldto.originalURL()));
     }
 
@@ -58,6 +62,7 @@ public class ShortenURLController {
 
     @GetMapping("/stats/{hashCode}")
     public ResponseEntity<URLResponseDTO> shortenURLStats(@PathVariable String hashCode) {
+        if(hashCode == null) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return ResponseEntity.ok(shortenURLService.getStats(hashCode));
     }
 

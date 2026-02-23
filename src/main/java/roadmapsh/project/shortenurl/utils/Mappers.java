@@ -1,7 +1,7 @@
 package roadmapsh.project.shortenurl.utils;
 
 
-import roadmapsh.project.shortenurl.DTO.URLResponseDTO;
+import roadmapsh.project.shortenurl.DTO.url.URLResponseDTO;
 import roadmapsh.project.shortenurl.model.URLModel;
 
 public class Mappers {
