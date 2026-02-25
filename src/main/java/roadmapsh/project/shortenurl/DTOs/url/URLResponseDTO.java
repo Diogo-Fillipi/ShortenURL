@@ -1,4 +1,4 @@
-package roadmapsh.project.shortenurl.DTO.url;
+package roadmapsh.project.shortenurl.DTOs.url;
 
 import java.time.LocalDateTime;
 

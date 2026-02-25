@@ -1,4 +1,4 @@
-package roadmapsh.project.shortenurl.service;
+package roadmapsh.project.shortenurl.services.url_services;
 
 import io.seruco.encoding.base62.Base62;
 import org.springframework.stereotype.Service;

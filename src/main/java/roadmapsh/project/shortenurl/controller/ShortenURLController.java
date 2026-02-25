@@ -6,11 +6,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roadmapsh.project.shortenurl.DTO.url.HashCodeDTO;
-import roadmapsh.project.shortenurl.DTO.url.NewURLDTO;
-import roadmapsh.project.shortenurl.DTO.url.URLDTO;
-import roadmapsh.project.shortenurl.DTO.url.URLResponseDTO;
-import roadmapsh.project.shortenurl.service.ShortenURLService;
+import roadmapsh.project.shortenurl.DTOs.url.HashCodeDTO;
+import roadmapsh.project.shortenurl.DTOs.url.NewURLDTO;
+import roadmapsh.project.shortenurl.DTOs.url.URLDTO;
+import roadmapsh.project.shortenurl.DTOs.url.URLResponseDTO;
+import roadmapsh.project.shortenurl.services.url_services.ShortenURLService;
 
 import java.net.URI;
 

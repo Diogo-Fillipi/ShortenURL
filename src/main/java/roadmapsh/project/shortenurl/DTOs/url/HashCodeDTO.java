@@ -1,4 +1,4 @@
-package roadmapsh.project.shortenurl.DTO.url;
+package roadmapsh.project.shortenurl.DTOs.url;
 
 public record HashCodeDTO(
         String code

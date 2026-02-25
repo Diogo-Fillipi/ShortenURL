@@ -1,7 +1,7 @@
-package roadmapsh.project.shortenurl.repository;
+package roadmapsh.project.shortenurl.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roadmapsh.project.shortenurl.model.URLModel;
+import roadmapsh.project.shortenurl.models.URLModel;
 
 import java.util.Optional;
 

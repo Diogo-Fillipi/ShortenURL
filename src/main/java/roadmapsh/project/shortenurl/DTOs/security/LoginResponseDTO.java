@@ -1,4 +1,4 @@
-package roadmapsh.project.shortenurl.DTO.security;
+package roadmapsh.project.shortenurl.DTOs.security;
 
 public record LoginResponseDTO(
         String token

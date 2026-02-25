@@ -1,4 +1,4 @@
-package roadmapsh.project.shortenurl.model;
+package roadmapsh.project.shortenurl.models;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -1,11 +1,11 @@
-package roadmapsh.project.shortenurl.security.securityservice;
+package roadmapsh.project.shortenurl.security.security_service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import roadmapsh.project.shortenurl.model.UserModel;
+import roadmapsh.project.shortenurl.models.UserModel;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

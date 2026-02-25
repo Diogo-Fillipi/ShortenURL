@@ -4,17 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roadmapsh.project.shortenurl.DTO.security.AuthenticationDTO;
-import roadmapsh.project.shortenurl.DTO.security.LoginResponseDTO;
-import roadmapsh.project.shortenurl.DTO.security.RegisterDTO;
-import roadmapsh.project.shortenurl.model.UserModel;
-import roadmapsh.project.shortenurl.repository.UserRepository;
+import roadmapsh.project.shortenurl.DTOs.security.AuthenticationDTO;
+import roadmapsh.project.shortenurl.DTOs.security.LoginResponseDTO;
+import roadmapsh.project.shortenurl.DTOs.security.RegisterDTO;
+import roadmapsh.project.shortenurl.models.UserModel;
+import roadmapsh.project.shortenurl.repositories.UserRepository;
 import roadmapsh.project.shortenurl.security.UserRoles;
-import roadmapsh.project.shortenurl.security.securityservice.SecurityService;
-import roadmapsh.project.shortenurl.security.securityservice.TokenService;
+import roadmapsh.project.shortenurl.security.security_service.SecurityService;
+import roadmapsh.project.shortenurl.security.security_service.TokenService;
 
 import java.util.Optional;
 

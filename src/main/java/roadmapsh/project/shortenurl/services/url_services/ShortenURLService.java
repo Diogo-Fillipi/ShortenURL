@@ -1,13 +1,13 @@
-package roadmapsh.project.shortenurl.service;
+package roadmapsh.project.shortenurl.services.url_services;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roadmapsh.project.shortenurl.DTO.url.URLResponseDTO;
-import roadmapsh.project.shortenurl.model.URLModel;
-import roadmapsh.project.shortenurl.repository.URLRepository;
+import roadmapsh.project.shortenurl.DTOs.url.URLResponseDTO;
+import roadmapsh.project.shortenurl.models.URLModel;
+import roadmapsh.project.shortenurl.repositories.URLRepository;
 import roadmapsh.project.shortenurl.utils.Mappers;
 
 import java.util.Optional;
@@ -89,8 +89,8 @@ public class ShortenURLService {
         return null;
     }
 
-    public URLResponseDTO getStats(String originalURLHashCode) {
-        Optional<URLModel> shortenURLModel = urlRepository.findByUrlHashCode(originalURLHashCode);
+    public URLResponseDTO getStats(String hashcode) {
+        Optional<URLModel> shortenURLModel = urlRepository.findByUrlHashCode(hashcode);
         if (shortenURLModel.isPresent()) {
             return Mappers.urlModelToUrlResponseDTO(shortenURLModel.get());
         }
