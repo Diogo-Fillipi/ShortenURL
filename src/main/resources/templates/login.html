@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login - URL Shortener</title>
+
+    <style>
+        * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+
+        body {
+            background-color: #0f172a;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 10px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+        }
+
+        h1 { color: #e5e7eb; margin-bottom: 10px; }
+
+        .subtitle {
+            color: #9ca3af;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .label {
+            display: block;
+            text-align: left;
+            color: #e5e7eb;
+            font-size: 14px;
+            margin: 10px 0 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: none;
+            margin-bottom: 10px;
+            background-color: #334155;
+            color: #e5e7eb;
+            outline: none;
+        }
+
+        input::placeholder { color: #9ca3af; }
+
+        input.invalid { outline: 2px solid #f87171; }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        #result {
+            margin-top: 20px;
+            word-break: break-word;
+            line-height: 1.5;
+            min-height: 20px;
+        }
+
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .info { color: #facc15; }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .footer a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .footer a:hover { text-decoration: underline; }
+    </style>
+
+    <script>
+        // ✅ Se já tiver token, manda direto pra home (evita o usuário voltar pro login sem necessidade)
+        (function () {
+            const token = localStorage.getItem("token");
+            if (token) {
+                window.location.replace("/home");
+            }
+        })();
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <h1>Login</h1>
+    <p class="subtitle">Access your URL Shortener account</p>
+
+    <form id="loginForm" novalidate>
+        <label class="label" for="email">Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required autocomplete="username"/>
+
+        <label class="label" for="password">Password</label>
+        <input type="password" id="password" placeholder="Your password" required autocomplete="current-password"/>
+
+        <button type="submit" id="loginBtn">Login</button>
+    </form>
+
+    <p id="result"></p>
+
+    <div class="footer">
+        Don&apos;t have an account? <a href="/register">Register</a>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("loginForm");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const result = document.getElementById("result");
+    const loginBtn = document.getElementById("loginBtn");
+    
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    }
+
+    function setStatus(message, type) {
+        result.textContent = message;
+        result.className = type || "";
+    }
+
+    function setInvalid(input, invalid) {
+        if (invalid) input.classList.add("invalid");
+        else input.classList.remove("invalid");
+    }
+
+    emailInput.addEventListener("input", () => {
+        const email = emailInput.value.trim();
+        if (!email) return setInvalid(emailInput, false);
+        setInvalid(emailInput, !isValidEmail(email));
+    });
+
+    passwordInput.addEventListener("input", () => {
+        if (passwordInput.value) setInvalid(passwordInput, false);
+    });
+
+    function logoutAndBackToLogin() {
+        localStorage.removeItem("token");
+        window.location.replace("/");
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        let hasError = false;
+        setStatus("", "");
+
+        if (!email || !isValidEmail(email)) {
+            setInvalid(emailInput, true);
+            setStatus("Please enter a valid email address.", "error");
+            hasError = true;
+        } else {
+            setInvalid(emailInput, false);
+        }
+
+        if (!password) {
+            setInvalid(passwordInput, true);
+            if (!hasError) setStatus("Password is required.", "error");
+            hasError = true;
+        } else {
+            setInvalid(passwordInput, false);
+        }
+
+        if (hasError) return;
+
+        loginBtn.disabled = true;
+        setStatus("Logging in...", "info");
+
+        try {
+            const response = await fetch("/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ login: email, password })
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                throw new Error("Invalid credentials.");
+            }
+
+            if (!response.ok) {
+                throw new Error("Login failed. Try again.");
+            }
+
+            const data = await response.json();
+
+            if (!data?.token) {
+                throw new Error("Login succeeded but no token was returned.");
+            }
+
+            localStorage.setItem("token", data.token);
+
+            setStatus("Login successful! Redirecting...", "success");
+
+            setTimeout(() => {
+                window.location.replace("/home");
+            }, 600);
+
+        } catch (error) {
+            if (String(error?.message || "").toLowerCase().includes("token")) {
+                logoutAndBackToLogin();
+                return;
+            }
+            setStatus(error.message || "Login failed.", "error");
+        } finally {
+            loginBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

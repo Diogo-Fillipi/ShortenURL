@@ -21,49 +21,35 @@ import java.util.Optional;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
 
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    SecurityService securityService;
+    private final SecurityService securityService;
 
-    TokenService tokenService;
 
-    public AuthenticationController(UserRepository userRepository, SecurityService securityService, TokenService tokenService) {
+    public AuthenticationController(UserRepository userRepository, SecurityService securityService) {
         this.userRepository = userRepository;
         this.securityService = securityService;
-        this.tokenService = tokenService;
+
     }
 
 
     @PostMapping("/login")
     public ResponseEntity login (@RequestBody @Validated AuthenticationDTO authenticationDTO) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(authenticationDTO.login(), authenticationDTO.password());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
-        var token = tokenService.generateToken((UserModel) auth.getPrincipal());
-
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+        return ResponseEntity.ok(securityService.login(authenticationDTO));
     }
 
     @PostMapping("/register")
     public ResponseEntity register (@RequestBody @Validated RegisterDTO registerDTO) {
-        Optional<UserModel> actualUser = this.userRepository.findByLogin(registerDTO.login());
-        if(actualUser.isPresent()) return  ResponseEntity.badRequest().build();
-        String encryptedPassword = securityService.encodePassword(registerDTO.password());
-        UserModel newuser = new UserModel(registerDTO.login(), encryptedPassword);
-        newuser.setRole(UserRoles.USER);
-        this.userRepository.save(newuser);
+        if(securityService.isThereAnyLogin(registerDTO.login()) == true) return ResponseEntity.badRequest().build();
+        securityService.registerUser(registerDTO);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/changerole")
     public ResponseEntity changerole (@RequestBody @Validated AuthenticationDTO authenticationDTO) {
-        Optional<UserModel>actualUser = this.userRepository.findByLogin(authenticationDTO.login());
-        if(actualUser.isEmpty()) return  ResponseEntity.badRequest().build();
-        UserModel user = actualUser.get();
-        user.setRole(UserRoles.ADMIN);
-        this.userRepository.save(user);
+        if(securityService.isThereAnyLogin(authenticationDTO.login()) == true) return ResponseEntity.badRequest().build();
+        securityService.changeRole(authenticationDTO);
         return ResponseEntity.ok().build();
     }
 }
