@@ -7,8 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class Home {
 
     @GetMapping("/")
-    public String index() {
-        return "index"; // looks for templates/index.html
+    public String loginPage() {
+        return "login"; // login.html
+    }
+
+    @GetMapping("/home")
+    public String homePage() {
+        return "index"; // index.html// looks for templates/index.html
     }
 }
 

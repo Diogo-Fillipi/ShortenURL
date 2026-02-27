@@ -30,7 +30,7 @@
 
         h1 {
             color: #e5e7eb;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         input {
@@ -41,6 +41,7 @@
             margin-bottom: 10px;
             background-color: #334155;
             color: #e5e7eb;
+            outline: none;
         }
 
         input::placeholder {
@@ -87,6 +88,14 @@
             background-color: #059669;
         }
 
+        #logoutBtn {
+            background-color: #64748b;
+        }
+
+        #logoutBtn:hover {
+            background-color: #475569;
+        }
+
         #updateForm,
         #statsForm {
             display: none;
@@ -97,12 +106,23 @@
             margin-top: 20px;
             word-break: break-word;
             line-height: 1.5;
+            min-height: 20px;
         }
 
         .success { color: #4ade80; }
         .error { color: #f87171; }
         .info { color: #facc15; }
     </style>
+
+    <script>
+        // ✅ Guard: se não tiver token, volta pro login (antes de renderizar a página)
+        (function () {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.replace("/");
+            }
+        })();
+    </script>
 </head>
 <body>
 
@@ -117,6 +137,7 @@
     <button id="updateBtn" type="button">Update URL</button>
     <button id="deleteBtn" type="button">Delete URL</button>
     <button id="statsBtn" type="button">Stats</button>
+    <button id="logoutBtn" type="button">Logout</button>
 
     <div id="updateForm">
         <input type="text" id="oldUrl" placeholder="Short code">
@@ -133,12 +154,16 @@
 </div>
 
 <script>
+    // Token salvo no login
+    const token = localStorage.getItem("token");
+
     const form = document.getElementById("shorten-form");
     const result = document.getElementById("result");
 
     const updateBtn = document.getElementById("updateBtn");
     const deleteBtn = document.getElementById("deleteBtn");
     const statsBtn = document.getElementById("statsBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
     const updateForm = document.getElementById("updateForm");
     const statsForm = document.getElementById("statsForm");
@@ -146,21 +171,47 @@
     const confirmUpdate = document.getElementById("confirmUpdate");
     const confirmStats = document.getElementById("confirmStats");
 
+    function setStatus(message, type) {
+        result.textContent = message;
+        result.className = type || "";
+    }
+
+    function authHeaders(extra = {}) {
+        return {
+            ...extra,
+            "Authorization": "Bearer " + token
+        };
+    }
+
+    async function handleAuthError(response) {
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("token");
+            window.location.replace("/");
+            return true;
+        }
+        return false;
+    }
+
+    logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.replace("/");
+    });
+
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const originalUrl = document.getElementById("originalUrl").value.trim();
 
-        result.textContent = "Creating short URL...";
-        result.className = "info";
+        setStatus("Creating short URL...", "info");
 
         try {
             const response = await fetch("/api/shorten", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: authHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify({ originalURL: originalUrl })
             });
 
+            if (await handleAuthError(response)) return;
             if (!response.ok) throw new Error();
 
             const data = await response.json();
@@ -172,44 +223,41 @@
             `;
             result.className = "success";
         } catch {
-            result.textContent = "Failed to shorten URL.";
-            result.className = "error";
+            setStatus("Failed to shorten URL.", "error");
         }
     });
 
     deleteBtn.addEventListener("click", async () => {
+        // Mantive como você fez: usa o campo de cima como short code para deletar
         const shortCode = document.getElementById("originalUrl").value.trim();
 
         if (!shortCode) {
-            result.textContent = "Enter a short code to delete.";
-            result.className = "error";
+            setStatus("Enter a short code to delete.", "error");
             return;
         }
 
-        result.textContent = "Deleting URL...";
-        result.className = "info";
+        setStatus("Deleting URL...", "info");
 
         try {
             const response = await fetch("/api/delete", {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: authHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify({ code: shortCode })
             });
 
+            if (await handleAuthError(response)) return;
             if (!response.ok) throw new Error();
 
-            result.textContent = "URL deleted successfully.";
-            result.className = "success";
+            setStatus("URL deleted successfully.", "success");
         } catch {
-            result.textContent = "Failed to delete URL.";
-            result.className = "error";
+            setStatus("Failed to delete URL.", "error");
         }
     });
 
     updateBtn.addEventListener("click", () => {
-        updateForm.style.display =
-            updateForm.style.display === "none" ? "block" : "none";
+        updateForm.style.display = (updateForm.style.display === "none" || !updateForm.style.display) ? "block" : "none";
         statsForm.style.display = "none";
+        setStatus("", "");
     });
 
     confirmUpdate.addEventListener("click", async () => {
@@ -217,24 +265,23 @@
         const newUrl = document.getElementById("newUrl").value.trim();
 
         if (!shortCode || !newUrl) {
-            result.textContent = "Fill in all fields.";
-            result.className = "error";
+            setStatus("Fill in all fields.", "error");
             return;
         }
 
-        result.textContent = "Updating URL...";
-        result.className = "info";
+        setStatus("Updating URL...", "info");
 
         try {
             const response = await fetch("/api/update", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: authHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     oldURLHashCode: shortCode,
                     newURL: newUrl
                 })
             });
 
+            if (await handleAuthError(response)) return;
             if (!response.ok) throw new Error();
 
             const data = await response.json();
@@ -247,31 +294,39 @@
             result.className = "success";
             updateForm.style.display = "none";
         } catch {
-            result.textContent = "Failed to update URL.";
-            result.className = "error";
+            setStatus("Failed to update URL.", "error");
         }
     });
 
     statsBtn.addEventListener("click", () => {
-        statsForm.style.display =
-            statsForm.style.display === "none" ? "block" : "none";
+        statsForm.style.display = (statsForm.style.display === "none" || !statsForm.style.display) ? "block" : "none";
         updateForm.style.display = "none";
+        setStatus("", "");
     });
 
     confirmStats.addEventListener("click", async () => {
         const hashCode = document.getElementById("statsHash").value.trim();
 
         if (!hashCode) {
-            result.textContent = "Enter a hash code.";
-            result.className = "error";
+            setStatus("Enter a hash code.", "error");
             return;
         }
 
-        result.textContent = "Fetching stats...";
-        result.className = "info";
+        setStatus("Fetching stats...", "info");
 
         try {
-            const response = await fetch(`/api/stats/${hashCode}`);
+            const response = await fetch(`/api/stats/${hashCode}`, {
+                method: "GET",
+                headers: authHeaders()
+            });
+
+            if (await handleAuthError(response)) return;
+
+            // se não for admin, tende a cair aqui com 403
+            if (response.status === 403) {
+                setStatus("Access denied: ADMIN role required for stats.", "error");
+                return;
+            }
 
             if (!response.ok) throw new Error();
 
@@ -288,8 +343,7 @@
             `;
             result.className = "success";
         } catch {
-            result.textContent = "Failed to fetch stats.";
-            result.className = "error";
+            setStatus("Failed to fetch stats.", "error");
         }
     });
 </script>

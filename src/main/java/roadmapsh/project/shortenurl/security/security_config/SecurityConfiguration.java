@@ -20,15 +20,26 @@ public class SecurityConfiguration {
     private SecurityFilter securityFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/stats").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/auth/changeroles").hasRole("ADMIN")
+                .authorizeHttpRequests(auth -> auth
+
+                        //páginas
+                        .requestMatchers(HttpMethod.GET, "/", "/home").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+
+                        //auth
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+
+                        //admin
+                        .requestMatchers(HttpMethod.GET, "/api/stats/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/auth/changerole").hasRole("ADMIN")
+
+                        //api
+                        .requestMatchers("/api/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
