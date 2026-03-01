@@ -228,7 +228,6 @@
     });
 
     deleteBtn.addEventListener("click", async () => {
-        // Mantive como você fez: usa o campo de cima como short code para deletar
         const shortCode = document.getElementById("originalUrl").value.trim();
 
         if (!shortCode) {
@@ -322,7 +321,6 @@
 
             if (await handleAuthError(response)) return;
 
-            // se não for admin, tende a cair aqui com 403
             if (response.status === 403) {
                 setStatus("Access denied: ADMIN role required for stats.", "error");
                 return;
