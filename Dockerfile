@@ -11,7 +11,7 @@ RUN mvn -DskipTests clean package
 
 #RUNTIME
 
-FROM eclipse-temurin:25.0.2_10-jre
+FROM eclipse-temurin:23.0.2_7-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 

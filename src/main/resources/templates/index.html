@@ -115,7 +115,6 @@
     </style>
 
     <script>
-        // ✅ Guard: se não tiver token, volta pro login (antes de renderizar a página)
         (function () {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -154,7 +153,6 @@
 </div>
 
 <script>
-    // Token salvo no login
     const token = localStorage.getItem("token");
 
     const form = document.getElementById("shorten-form");
@@ -228,7 +226,6 @@
     });
 
     deleteBtn.addEventListener("click", async () => {
-        // Mantive como você fez: usa o campo de cima como short code para deletar
         const shortCode = document.getElementById("originalUrl").value.trim();
 
         if (!shortCode) {
