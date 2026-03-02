@@ -115,7 +115,6 @@
     </style>
 
     <script>
-        // ✅ Guard: se não tiver token, volta pro login (antes de renderizar a página)
         (function () {
             const token = localStorage.getItem("token");
             if (!token) {
